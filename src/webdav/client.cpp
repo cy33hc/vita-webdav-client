@@ -455,6 +455,7 @@ namespace WebDAV
 
     pugi::xml_document document;
     document.load_buffer(data.buffer, static_cast<size_t>(data.size));
+
 #ifdef WDC_VERBOSE
     document.save(std::cout);
 #endif
@@ -470,6 +471,9 @@ namespace WebDAV
       if (!target_path_without_sep.empty() && target_path_without_sep.back() == '/')
         target_path_without_sep.resize(target_path_without_sep.length() - 1);
       auto resource_path_without_sep = resource_path.erase(resource_path.find_last_not_of('/') + 1);
+      size_t pos = resource_path_without_sep.find(this->webdav_hostname);
+      if (pos != std::string::npos)
+        resource_path_without_sep.erase(pos, this->webdav_hostname.length());
 
       if (resource_path_without_sep == target_path_without_sep)
       {
@@ -554,8 +558,16 @@ namespace WebDAV
       std::string encode_file_name = href.first_child().value();
       std::string resource_path = curl_unescape(encode_file_name.c_str(), static_cast<int>(encode_file_name.length()));
       auto target_path = target_urn.path();
-      Path resource_urn(resource_path);
-      if (resource_urn == target_urn)
+
+      auto target_path_without_sep = target_urn.path();
+      if (!target_path_without_sep.empty() && target_path_without_sep.back() == '/')
+        target_path_without_sep.resize(target_path_without_sep.length() - 1);
+      auto resource_path_without_sep = resource_path.erase(resource_path.find_last_not_of('/') + 1);
+      size_t pos = resource_path_without_sep.find(this->webdav_hostname);
+      if (pos != std::string::npos)
+        resource_path_without_sep.erase(pos, this->webdav_hostname.length());
+
+      if (resource_path_without_sep == target_path_without_sep)
         continue;
 
       auto propstat = response.node().select_node("*[local-name()='propstat']").node();
@@ -566,6 +578,7 @@ namespace WebDAV
       auto modified_date = prop.select_node("*[local-name()='getlastmodified']").node();
       auto resource_type = prop.select_node("*[local-name()='resourcetype']").node();
 
+      Path resource_urn(resource_path);
       std::string name = resource_urn.name();
       dict_t item = {
           {"created", creation_date.first_child().value()},

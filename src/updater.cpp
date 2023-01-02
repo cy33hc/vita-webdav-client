@@ -216,7 +216,7 @@ namespace Updater {
         unzClose(zipfile);
     }
 
-    int UpdateFtpClient()
+    int UpdateWebdavClient()
     {
         std::vector<char> current_version;
         std::vector<char> update_version;
@@ -225,7 +225,7 @@ namespace Updater {
         int ret;
 
         FS::MkDirs(WEBDAV_CLIENT_VPK_UPDATE_PATH, true);
-        sprintf(updater_message, "Checking for Ftp Client Update");
+        sprintf(updater_message, "Checking for Webdav Client Update");
         ret = Net::DownloadFile(WEBDAV_CLIENT_VERSION_URL, WEBDAV_CLIENT_VERSION_UPDATE_PATH);
         if (ret < 0)
         {
@@ -240,7 +240,7 @@ namespace Updater {
         ret = 0;
         if (strcmp(cur_ver, upd_ver) != 0)
         {
-            sprintf(updater_message, "Downloading Ftp Client update");
+            sprintf(updater_message, "Downloading Webdav Client update");
             ret = Net::DownloadFile(WEBDAV_CLIENT_VPK_URL, WEBDAV_CLIENT_VPK_UPDATE_PATH);
             if (ret < 0)
             {
@@ -278,7 +278,7 @@ namespace Updater {
         int updated = 0;
         if (itls_enso_installed || fw.version > 0x03650000)
         {
-            updated = UpdateFtpClient();
+            updated = UpdateWebdavClient();
         }
 
         if (!itls_enso_installed && fw.version <= 0x03650000 && warn_missing_installs)
@@ -289,7 +289,7 @@ namespace Updater {
 
         if (updated == 1)
         {
-            sprintf(updater_message, "FtpClient updated successfully.\nRestarting after 3s");
+            sprintf(updater_message, "Webdav Client updated successfully.\nRestarting after 3s");
             sceKernelDelayThread(3000000);
             sceAppMgrLoadExec("app0:eboot.bin", NULL, NULL);
         }

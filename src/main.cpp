@@ -18,11 +18,16 @@
 #include "lang.h"
 #include "util.h"
 #include "debugScreen.h"
-//#include "debugnet.h"
+// #include "debugnet.h"
 
 int console_language;
 namespace Services
 {
+	ImVec4 ColorFromBytes(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
+	{
+		return ImVec4((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, (float)a / 255.0f);
+	};
+
 	int InitImGui(void)
 	{
 
@@ -32,11 +37,11 @@ namespace Services
 		ImGuiIO &io = ImGui::GetIO();
 		io.MouseDrawCursor = false;
 		io.KeyRepeatRate = 0.005f;
-		ImGui::StyleColorsDark();
 		auto &style = ImGui::GetStyle();
 		ImGui::GetIO().Fonts->Clear();
 
-		static const ImWchar ranges[] = { // All languages with chinese included
+		static const ImWchar ranges[] = {
+			// All languages with chinese included
 			0x0020, 0x00FF, // Basic Latin + Latin Supplement
 			0x0100, 0x024F, // Latin Extended
 			0x0370, 0x03FF, // Greek
@@ -97,22 +102,22 @@ namespace Services
 					io.Fonts->GetGlyphRangesChineseFull());
 				break;
 			case SCE_SYSTEM_PARAM_LANG_KOREAN:
-				{
-					ImFontConfig config;
-					config.MergeMode = true;
-					io.Fonts->AddFontFromFileTTF(
-						"sa0:/data/font/pvf/ltn0.pvf",
-						16.0f,
-						NULL,
-						io.Fonts->GetGlyphRangesDefault());
-					io.Fonts->AddFontFromFileTTF(
-						"sa0:/data/font/pvf/kr0.pvf",
-						16.0f,
-						&config,
-						io.Fonts->GetGlyphRangesKorean());
-					io.Fonts->Build();
-				}
-				break;
+			{
+				ImFontConfig config;
+				config.MergeMode = true;
+				io.Fonts->AddFontFromFileTTF(
+					"sa0:/data/font/pvf/ltn0.pvf",
+					16.0f,
+					NULL,
+					io.Fonts->GetGlyphRangesDefault());
+				io.Fonts->AddFontFromFileTTF(
+					"sa0:/data/font/pvf/kr0.pvf",
+					16.0f,
+					&config,
+					io.Fonts->GetGlyphRangesKorean());
+				io.Fonts->Build();
+			}
+			break;
 			case SCE_SYSTEM_PARAM_LANG_JAPANESE:
 				io.Fonts->AddFontFromFileTTF(
 					"sa0:/data/font/pvf/jpn0.pvf",
@@ -137,56 +142,67 @@ namespace Services
 		style.FrameRounding = 2.0f;
 		style.GrabRounding = 2.0f;
 
-		//Style::LoadStyle(style_path);
-        ImVec4 *colors = ImGui::GetStyle().Colors;
-        colors[ImGuiCol_Text] = ImVec4(0.95f, 0.96f, 0.98f, 1.00f);
-        colors[ImGuiCol_TextDisabled] = ImVec4(0.36f, 0.42f, 0.47f, 1.00f);
-        colors[ImGuiCol_WindowBg] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
-        colors[ImGuiCol_ChildBg] = ImVec4(0.15f, 0.18f, 0.22f, 1.00f);
-        colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
-        colors[ImGuiCol_Border] = ImVec4(0.08f, 0.10f, 0.12f, 1.00f);
-        colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-        colors[ImGuiCol_FrameBg] = ImVec4(0.20f, 0.25f, 0.29f, 1.00f);
-        colors[ImGuiCol_FrameBgHovered] = ImVec4(0.12f, 0.20f, 0.28f, 1.00f);
-        colors[ImGuiCol_FrameBgActive] = ImVec4(0.09f, 0.12f, 0.14f, 1.00f);
-        colors[ImGuiCol_TitleBg] = ImVec4(0.09f, 0.12f, 0.14f, 0.65f);
-        colors[ImGuiCol_TitleBgActive] = ImVec4(0.08f, 0.10f, 0.12f, 1.00f);
-        colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
-        colors[ImGuiCol_MenuBarBg] = ImVec4(0.15f, 0.18f, 0.22f, 1.00f);
-        colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.39f);
-        colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.20f, 0.25f, 0.29f, 1.00f);
-        colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.18f, 0.22f, 0.25f, 1.00f);
-        colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.09f, 0.21f, 0.31f, 1.00f);
-        colors[ImGuiCol_CheckMark] = ImVec4(0.00f, 0.50f, 0.50f, 1.0f);
-        colors[ImGuiCol_SliderGrab] = ImVec4(0.28f, 0.56f, 1.00f, 1.00f);
-        colors[ImGuiCol_SliderGrabActive] = ImVec4(0.37f, 0.61f, 1.00f, 1.00f);
-        colors[ImGuiCol_Button] = ImVec4(0.20f, 0.25f, 0.29f, 1.00f);
-        colors[ImGuiCol_ButtonHovered] = ImVec4(0.00f, 0.50f, 0.50f, 1.0f);
-        colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.50f, 0.50f, 1.0f);
-        colors[ImGuiCol_Header] = ImVec4(0.20f, 0.25f, 0.29f, 0.55f);
-        colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.50f, 0.50f, 1.0f);
-        colors[ImGuiCol_HeaderActive] = ImVec4(0.00f, 0.50f, 0.50f, 1.0f);
-        colors[ImGuiCol_Separator] = ImVec4(0.20f, 0.25f, 0.29f, 1.00f);
-        colors[ImGuiCol_SeparatorHovered] = ImVec4(0.10f, 0.40f, 0.75f, 0.78f);
-        colors[ImGuiCol_SeparatorActive] = ImVec4(0.10f, 0.40f, 0.75f, 1.00f);
-        colors[ImGuiCol_ResizeGrip] = ImVec4(0.26f, 0.59f, 0.98f, 0.25f);
-        colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
-        colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
-        colors[ImGuiCol_Tab] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
-        colors[ImGuiCol_TabHovered] = ImVec4(0.00f, 0.50f, 0.50f, 1.0f);
-        colors[ImGuiCol_TabActive] = ImVec4(0.00f, 0.50f, 0.50f, 1.0f);
-        colors[ImGuiCol_TabUnfocused] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
-        colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
-        colors[ImGuiCol_PlotLines] = ImVec4(0.00f, 0.50f, 0.50f, 1.0f);
-        colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
-        colors[ImGuiCol_PlotHistogram] = ImVec4(0.00f, 0.50f, 0.50f, 1.0f);
-        colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-        colors[ImGuiCol_TextSelectedBg] = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
-        colors[ImGuiCol_DragDropTarget] = ImVec4(1.00f, 1.00f, 0.00f, 0.90f);
-        colors[ImGuiCol_NavHighlight] = ImVec4(0.00f, 0.50f, 0.50f, 1.0f);
-        colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
-        colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
-        colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+		ImVec4* colors = style.Colors;
+		const ImVec4 bgColor           = ColorFromBytes(37, 37, 38);
+		const ImVec4 bgColorBlur       = ColorFromBytes(37, 37, 38, 170);
+		const ImVec4 lightBgColor      = ColorFromBytes(82, 82, 85);
+		const ImVec4 veryLightBgColor  = ColorFromBytes(90, 90, 95);
+
+		const ImVec4 titleColor        = ColorFromBytes(10, 100, 142);
+		const ImVec4 panelColor        = ColorFromBytes(51, 51, 55);
+		const ImVec4 panelHoverColor   = ColorFromBytes(29, 151, 236);
+		const ImVec4 panelActiveColor  = ColorFromBytes(0, 119, 200);
+
+		const ImVec4 textColor         = ColorFromBytes(255, 255, 255);
+		const ImVec4 textDisabledColor = ColorFromBytes(151, 151, 151);
+		const ImVec4 borderColor       = ColorFromBytes(78, 78, 78);
+
+		colors[ImGuiCol_Text]                 = textColor;
+		colors[ImGuiCol_TextDisabled]         = textDisabledColor;
+		colors[ImGuiCol_TextSelectedBg]       = panelActiveColor;
+		colors[ImGuiCol_WindowBg]             = bgColor;
+		colors[ImGuiCol_ChildBg]              = panelColor;
+		colors[ImGuiCol_PopupBg]              = bgColor;
+		colors[ImGuiCol_Border]               = borderColor;
+		colors[ImGuiCol_BorderShadow]         = borderColor;
+		colors[ImGuiCol_FrameBg]              = panelColor;
+		colors[ImGuiCol_FrameBgHovered]       = panelHoverColor;
+		colors[ImGuiCol_FrameBgActive]        = panelActiveColor;
+		colors[ImGuiCol_TitleBg]              = titleColor;
+		colors[ImGuiCol_TitleBgActive]        = titleColor;
+		colors[ImGuiCol_TitleBgCollapsed]     = titleColor;
+		colors[ImGuiCol_MenuBarBg]            = panelColor;
+		colors[ImGuiCol_ScrollbarBg]          = panelColor;
+		colors[ImGuiCol_ScrollbarGrab]        = lightBgColor;
+		colors[ImGuiCol_ScrollbarGrabHovered] = veryLightBgColor;
+		colors[ImGuiCol_ScrollbarGrabActive]  = veryLightBgColor;
+		colors[ImGuiCol_CheckMark]            = panelActiveColor;
+		colors[ImGuiCol_SliderGrab]           = panelHoverColor;
+		colors[ImGuiCol_SliderGrabActive]     = panelActiveColor;
+		colors[ImGuiCol_Button]               = panelColor;
+		colors[ImGuiCol_ButtonHovered]        = panelHoverColor;
+		colors[ImGuiCol_ButtonActive]         = panelHoverColor;
+		colors[ImGuiCol_Header]               = panelColor;
+		colors[ImGuiCol_HeaderHovered]        = panelHoverColor;
+		colors[ImGuiCol_HeaderActive]         = panelActiveColor;
+		colors[ImGuiCol_Separator]            = borderColor;
+		colors[ImGuiCol_SeparatorHovered]     = borderColor;
+		colors[ImGuiCol_SeparatorActive]      = borderColor;
+		colors[ImGuiCol_ResizeGrip]           = bgColor;
+		colors[ImGuiCol_ResizeGripHovered]    = panelColor;
+		colors[ImGuiCol_ResizeGripActive]     = lightBgColor;
+		colors[ImGuiCol_PlotLines]            = panelActiveColor;
+		colors[ImGuiCol_PlotLinesHovered]     = panelHoverColor;
+		colors[ImGuiCol_PlotHistogram]        = panelActiveColor;
+		colors[ImGuiCol_PlotHistogramHovered] = panelHoverColor;
+		colors[ImGuiCol_ModalWindowDarkening] = bgColorBlur;
+		colors[ImGuiCol_DragDropTarget]       = bgColor;
+		colors[ImGuiCol_NavHighlight]         = bgColor;
+		colors[ImGuiCol_Tab]                  = bgColor;
+		colors[ImGuiCol_TabActive]            = panelActiveColor;
+		colors[ImGuiCol_TabUnfocused]         = bgColor;
+		colors[ImGuiCol_TabUnfocusedActive]   = panelActiveColor;
+		colors[ImGuiCol_TabHovered]           = panelHoverColor;
 
 		vglInitExtended(0, 960, 544, 0x1800000, SCE_GXM_MULTISAMPLE_4X);
 		ImGui::CreateContext();
@@ -231,11 +247,11 @@ namespace Services
 		sceAppUtilSystemParamGetInt(SCE_SYSTEM_PARAM_ID_ENTER_BUTTON, (int *)&config.enterButtonAssign);
 		sceCommonDialogSetConfigParam(&config);
 
-		uint32_t scepaf_argp[] = { 0x400000, 0xEA60, 0x40000, 0, 0 };
+		uint32_t scepaf_argp[] = {0x400000, 0xEA60, 0x40000, 0, 0};
 
 		SceSysmoduleOpt option;
-        option.flags = 0;
-        option.result = (int *)&option.flags;
+		option.flags = 0;
+		option.result = (int *)&option.flags;
 		sceSysmoduleLoadModuleInternalWithArg(SCE_SYSMODULE_INTERNAL_PAF, sizeof(scepaf_argp), scepaf_argp, &option);
 		sceSysmoduleLoadModuleInternal(SCE_SYSMODULE_INTERNAL_PROMOTER_UTIL);
 		scePromoterUtilityInit();
@@ -280,8 +296,8 @@ unsigned int _newlib_heap_size_user = 190 * 1024 * 1024;
 
 int main(int, char **)
 {
-	//debugNetInit(ip_server,port_server, DEBUG);
-	//debugNetPrintf(DEBUG, "Test message\n");
+	// debugNetInit(ip_server,port_server, DEBUG);
+	// debugNetPrintf(DEBUG, "Test message\n");
 	if (!FS::FileExists("ur0:/data/libshacccg.suprx") && !FS::FileExists("ur0:/data/external/libshacccg.suprx"))
 	{
 		psvDebugScreenInit();

@@ -86,9 +86,12 @@ namespace WebDAV
     }
 
     this->set(CURLOPT_URL, const_cast<char *>(webdav_hostname.c_str()));
-    this->set(CURLOPT_HTTPAUTH, static_cast<int>(CURLAUTH_BASIC));
-    auto token = webdav_username + ":" + webdav_password;
-    this->set(CURLOPT_USERPWD, const_cast<char *>(token.c_str()));
+    if (!webdav_username.empty() && !webdav_password.empty())
+    {
+      this->set(CURLOPT_HTTPAUTH, static_cast<int>(CURLAUTH_BASIC));
+      auto token = webdav_username + ":" + webdav_password;
+      this->set(CURLOPT_USERPWD, const_cast<char *>(token.c_str()));
+    }
     this->set(CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
 
     if (!this->proxy_enabled())
@@ -106,8 +109,11 @@ namespace WebDAV
     }
     else
     {
-      token = proxy_username + ":" + proxy_password;
-      this->set(CURLOPT_PROXYUSERPWD, const_cast<char *>(token.c_str()));
+      if (!webdav_username.empty() && !webdav_password.empty())
+      {
+        auto token = proxy_username + ":" + proxy_password;
+        this->set(CURLOPT_PROXYUSERPWD, const_cast<char *>(token.c_str()));
+      }
     }
 
   }

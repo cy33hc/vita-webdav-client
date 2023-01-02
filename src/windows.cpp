@@ -152,7 +152,7 @@ namespace Windows
         ImGuiStyle *style = &ImGui::GetStyle();
         ImVec4 *colors = style->Colors;
         static char title[32];
-        sprintf(title, "v%s  %s", app_ver, lang_strings[STR_CONNECTION_SETTINGS]);
+        sprintf(title, "v%s WebDAV %s", app_ver, lang_strings[STR_CONNECTION_SETTINGS]);
         BeginGroupPanel(title, ImVec2(945, 100));
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3);
         char id[256];
