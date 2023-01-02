@@ -28,7 +28,6 @@
 #include "pugiext.hpp"
 #include "request.hpp"
 #include "urn.hpp"
-
 #include <algorithm>
 #include <thread>
 
@@ -36,7 +35,7 @@ namespace WebDAV
 {
   using Urn::Path;
 
-  using progress_funptr = int (*)(void *context, size_t dltotal, size_t dlnow, size_t ultotal, size_t ulnow);
+  using progress_funptr = int (*)(void *context, uint64_t dltotal, uint64_t dlnow, uint64_t ultotal, uint64_t ulnow);
 
   dict_t
   Client::options() const
@@ -59,6 +58,7 @@ namespace WebDAV
       const std::string &remote_file,
       const std::string &local_file,
       callback_t callback,
+      progress_data_t progress_data,
       progress_t progress) const
   {
     bool is_existed = this->check(remote_file);
@@ -84,7 +84,8 @@ namespace WebDAV
 #endif
     if (progress != nullptr)
     {
-      request.set(CURLOPT_XFERINFOFUNCTION, reinterpret_cast<size_t>(progress.target<progress_funptr>()));
+      request.set(CURLOPT_XFERINFODATA, progress_data);
+      request.set(CURLOPT_XFERINFOFUNCTION, progress);
       request.set(CURLOPT_NOPROGRESS, 0L);
     }
 
@@ -101,6 +102,7 @@ namespace WebDAV
       char *&buffer_ptr,
       unsigned long long &buffer_size,
       callback_t callback,
+      progress_data_t progress_data,
       progress_t progress) const
   {
     bool is_existed = this->check(remote_file);
@@ -126,7 +128,8 @@ namespace WebDAV
 #endif
     if (progress != nullptr)
     {
-      request.set(CURLOPT_XFERINFOFUNCTION, reinterpret_cast<size_t>(progress.target<progress_funptr>()));
+      request.set(CURLOPT_XFERINFODATA, progress_data);
+      request.set(CURLOPT_XFERINFOFUNCTION, progress);
       request.set(CURLOPT_NOPROGRESS, 0L);
     }
 
@@ -147,6 +150,7 @@ namespace WebDAV
       const std::string &remote_file,
       std::ostream &stream,
       callback_t callback,
+      progress_data_t progress_data,
       progress_t progress) const
   {
     bool is_existed = this->check(remote_file);
@@ -170,7 +174,8 @@ namespace WebDAV
 #endif
     if (progress != nullptr)
     {
-      request.set(CURLOPT_XFERINFOFUNCTION, reinterpret_cast<size_t>(progress.target<progress_funptr>()));
+      request.set(CURLOPT_XFERINFODATA, progress_data);
+      request.set(CURLOPT_XFERINFOFUNCTION, progress);
       request.set(CURLOPT_NOPROGRESS, 0L);
     }
 
@@ -186,6 +191,7 @@ namespace WebDAV
       const std::string &remote_file,
       const std::string &local_file,
       callback_t callback,
+      progress_data_t progress_data,
       progress_t progress) const
   {
     bool is_existed = FileInfo::exists(local_file);
@@ -217,7 +223,8 @@ namespace WebDAV
 #endif
     if (progress != nullptr)
     {
-      request.set(CURLOPT_XFERINFOFUNCTION, reinterpret_cast<size_t>(progress.target<progress_funptr>()));
+      request.set(CURLOPT_XFERINFODATA, progress_data);
+      request.set(CURLOPT_XFERINFOFUNCTION, progress);
       request.set(CURLOPT_NOPROGRESS, 0L);
     }
 
@@ -234,6 +241,7 @@ namespace WebDAV
       char *buffer_ptr,
       unsigned long long buffer_size,
       callback_t callback,
+      progress_data_t progress_data,
       progress_t progress) const
   {
     auto root_urn = Path(this->webdav_root, true);
@@ -260,7 +268,8 @@ namespace WebDAV
 #endif
     if (progress != nullptr)
     {
-      request.set(CURLOPT_XFERINFOFUNCTION, reinterpret_cast<size_t>(progress.target<progress_funptr>()));
+      request.set(CURLOPT_XFERINFODATA, progress_data);
+      request.set(CURLOPT_XFERINFOFUNCTION, progress);
       request.set(CURLOPT_NOPROGRESS, 0L);
     }
 
@@ -278,6 +287,7 @@ namespace WebDAV
       const std::string &remote_file,
       std::istream &stream,
       callback_t callback,
+      progress_data_t progress_data,
       progress_t progress) const
   {
     auto root_urn = Path(this->webdav_root, true);
@@ -305,7 +315,8 @@ namespace WebDAV
 #endif
     if (progress != nullptr)
     {
-      request.set(CURLOPT_XFERINFOFUNCTION, reinterpret_cast<size_t>(progress.target<progress_funptr>()));
+      request.set(CURLOPT_XFERINFODATA, progress_data);
+      request.set(CURLOPT_XFERINFOFUNCTION, progress);
       request.set(CURLOPT_NOPROGRESS, 0L);
     }
 
@@ -472,7 +483,7 @@ namespace WebDAV
         dict_t information =
             {
                 {"created", creation_date.first_child().value()},
-                {"name", display_name.first_child().value()},
+                {"name", target_urn.name()},
                 {"size", content_length.first_child().value()},
                 {"modified", modified_date.first_child().value()},
                 {"type", resource_type.first_child().name()}};
@@ -554,11 +565,11 @@ namespace WebDAV
       auto resource_type = prop.select_node("*[local-name()='resourcetype']").node();
 
       dict_t item = {
-                {"created", creation_date.first_child().value()},
-                {"name", display_name.first_child().value()},
-                {"size", content_length.first_child().value()},
-                {"modified", modified_date.first_child().value()},
-                {"type", resource_type.first_child().name()}};
+          {"created", creation_date.first_child().value()},
+          {"name", resource_urn.name()},
+          {"size", content_length.first_child().value()},
+          {"modified", modified_date.first_child().value()},
+          {"type", resource_type.first_child().name()}};
       resources.push_back(item);
     }
 
@@ -568,9 +579,10 @@ namespace WebDAV
   bool Client::download(
       const std::string &remote_file,
       const std::string &local_file,
+      progress_data_t progress_data,
       progress_t progress) const
   {
-    return this->sync_download(remote_file, local_file, nullptr, std::move(progress));
+    return this->sync_download(remote_file, local_file, nullptr, progress_data, std::move(progress));
   }
 
   void
@@ -578,10 +590,11 @@ namespace WebDAV
       const std::string &remote_file,
       const std::string &local_file,
       callback_t callback,
+      progress_data_t progress_data,
       progress_t progress) const
   {
     std::thread downloading([=]()
-                            { this->sync_download(remote_file, local_file, callback, std::move(progress)); });
+                            { this->sync_download(remote_file, local_file, callback, progress_data, std::move(progress)); });
     downloading.detach();
   }
 
@@ -590,18 +603,20 @@ namespace WebDAV
       const std::string &remote_file,
       char *&buffer_ptr,
       unsigned long long &buffer_size,
+      progress_data_t progress_data,
       progress_t progress) const
   {
-    return this->sync_download_to(remote_file, buffer_ptr, buffer_size, nullptr, std::move(progress));
+    return this->sync_download_to(remote_file, buffer_ptr, buffer_size, nullptr, progress_data, std::move(progress));
   }
 
   bool
   Client::download_to(
       const std::string &remote_file,
       std::ostream &stream,
+      progress_data_t progress_data,
       progress_t progress) const
   {
-    return this->sync_download_to(remote_file, stream, nullptr, std::move(progress));
+    return this->sync_download_to(remote_file, stream, nullptr, progress_data, std::move(progress));
   }
 
   bool
@@ -712,9 +727,10 @@ namespace WebDAV
   Client::upload(
       const std::string &remote_file,
       const std::string &local_file,
+      progress_data_t progress_data,
       progress_t progress) const
   {
-    return this->sync_upload(remote_file, local_file, nullptr, std::move(progress));
+    return this->sync_upload(remote_file, local_file, nullptr, progress_data, std::move(progress));
   }
 
   void
@@ -722,10 +738,11 @@ namespace WebDAV
       const std::string &remote_file,
       const std::string &local_file,
       callback_t callback,
+      progress_data_t progress_data,
       progress_t progress) const
   {
     std::thread uploading([=]()
-                          { this->sync_upload(remote_file, local_file, callback, std::move(progress)); });
+                          { this->sync_upload(remote_file, local_file, callback, progress_data, std::move(progress)); });
     uploading.detach();
   }
 
@@ -733,9 +750,10 @@ namespace WebDAV
   Client::upload_from(
       const std::string &remote_file,
       std::istream &stream,
+      progress_data_t progress_data,
       progress_t progress) const
   {
-    return this->sync_upload_from(remote_file, stream, nullptr, std::move(progress));
+    return this->sync_upload_from(remote_file, stream, nullptr, progress_data, std::move(progress));
   }
 
   bool
@@ -743,9 +761,10 @@ namespace WebDAV
       const std::string &remote_file,
       char *buffer_ptr,
       unsigned long long buffer_size,
+      progress_data_t progress_data,
       progress_t progress) const
   {
-    return this->sync_upload_from(remote_file, buffer_ptr, buffer_size, nullptr, std::move(progress));
+    return this->sync_upload_from(remote_file, buffer_ptr, buffer_size, nullptr, progress_data, std::move(progress));
   }
 
   bool

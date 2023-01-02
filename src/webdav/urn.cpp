@@ -54,7 +54,6 @@ namespace WebDAV
 
       if (force_dir && !is_dir) path += Path::separate;
       m_path = path;
-
       auto double_separte = Path::separate + Path::separate;
       bool is_find = false;
       do

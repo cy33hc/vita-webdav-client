@@ -20,7 +20,7 @@
 #
 ############################################################################*/
 
-#include <sys/socket.h>
+#include <psp2/net/net.h>
 #include "request.hpp"
 #include "fsinfo.hpp"
 
@@ -29,15 +29,15 @@ namespace WebDAV
   static int sockopt_callback(void *clientp, curl_socket_t curlfd, curlsocktype purpose)
   {
     int const size = 1048576;
-    if (setsockopt(curlfd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size)) == -1)
+    if (sceNetSetsockopt(curlfd, SCE_NET_SOL_SOCKET, SCE_NET_SO_RCVBUF, &size, sizeof (size)) == -1)
+    {
+      return CURL_SOCKOPT_ERROR;
+    }
+    if (sceNetSetsockopt(curlfd, SCE_NET_SOL_SOCKET, SCE_NET_SO_SNDBUF, &size, sizeof (size)) == -1)
     {
       return CURL_SOCKOPT_ERROR;
     }
 
-    if (setsockopt(curlfd, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size)) == -1)
-    {
-      return CURL_SOCKOPT_ERROR;
-    }
     return CURL_SOCKOPT_OK;
   }
 
@@ -89,6 +89,7 @@ namespace WebDAV
     this->set(CURLOPT_HTTPAUTH, static_cast<int>(CURLAUTH_BASIC));
     auto token = webdav_username + ":" + webdav_password;
     this->set(CURLOPT_USERPWD, const_cast<char *>(token.c_str()));
+    this->set(CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
 
     if (!this->proxy_enabled())
       return;
@@ -109,7 +110,6 @@ namespace WebDAV
       this->set(CURLOPT_PROXYUSERPWD, const_cast<char *>(token.c_str()));
     }
 
-    this->set(CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
   }
 
   Request::~Request() noexcept

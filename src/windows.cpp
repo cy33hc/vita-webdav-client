@@ -37,9 +37,9 @@ static char txt_server_port[6];
 bool handle_updates = false;
 float previous_right = 0.0f;
 float previous_left = 0.0f;
-WebDavClient *webdavclient;
-int64_t bytes_transfered;
-int64_t bytes_to_download;
+WebDAV::WebDavClient *webdavclient;
+uint64_t bytes_transfered;
+uint64_t bytes_to_download;
 std::vector<FsEntry> local_files;
 std::vector<FsEntry> remote_files;
 std::set<FsEntry> multi_selected_local_files;
@@ -76,7 +76,7 @@ namespace Windows
 
     void Init()
     {
-        webdavclient = new WebDavClient();
+        webdavclient = new WebDAV::WebDavClient();
 
         sprintf(local_file_to_select, "..");
         sprintf(remote_file_to_select, "..");
@@ -246,9 +246,9 @@ namespace Windows
             ImGui::EndCombo();
         }
         ImGui::SameLine();
-        // ImGui::TextColored(colors[ImGuiCol_ButtonHovered], "Server:"); ImGui::SameLine();
+
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.0f, 1.0f));
-        if (ImGui::Button(webdav_settings->server, ImVec2(145, 0)))
+        if (ImGui::Button(webdav_settings->server, ImVec2(290, 0)))
         {
             ime_single_field = webdav_settings->server;
             ResetImeCallbacks();

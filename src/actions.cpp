@@ -3,7 +3,6 @@
 #include "config.h"
 #include "windows.h"
 #include "webdavclient.h"
-#include "debugnet.h"
 #include "util.h"
 #include "lang.h"
 

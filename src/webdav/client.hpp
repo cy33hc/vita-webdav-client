@@ -31,11 +31,13 @@
 
 namespace WebDAV
 {
-  using progress_t = std::function<int(void* context,
-                                       size_t dltotal,
-                                       size_t dlnow,
-                                       size_t ultotal,
-                                       size_t ulnow)> ;
+  using progress_data_t = void*;
+
+  using progress_t = int(void* context,
+                                       uint64_t dltotal,
+                                       uint64_t dlnow,
+                                       uint64_t ultotal,
+                                       uint64_t ulnow);
 
   using callback_t = std::function<void(bool)> ;
 
@@ -158,6 +160,7 @@ namespace WebDAV
     auto download(
       const std::string& remote_file,
       const std::string& local_file,
+      progress_data_t progress_data = nullptr,
       progress_t progress = nullptr
     ) const -> bool;
 
@@ -173,6 +176,7 @@ namespace WebDAV
       const std::string& remote_file,
       char*& buffer_ptr,
       unsigned long long& buffer_size,
+      progress_data_t progress_data = nullptr,
       progress_t progress = nullptr
     ) const -> bool;
 
@@ -186,6 +190,7 @@ namespace WebDAV
     auto download_to(
       const std::string& remote_file,
       std::ostream& stream,
+      progress_data_t progress_data = nullptr,
       progress_t progress = nullptr
     ) const -> bool;
 
@@ -201,6 +206,7 @@ namespace WebDAV
       const std::string& remote_file,
       const std::string& local_file,
       callback_t callback = nullptr,
+      progress_data_t progress_data = nullptr,
       progress_t progress = nullptr
     ) const -> void;
 
@@ -214,6 +220,7 @@ namespace WebDAV
     auto upload(
       const std::string& remote_file,
       const std::string& local_file,
+      progress_data_t progress_data = nullptr,
       progress_t progress = nullptr
     ) const -> bool;
 
@@ -229,6 +236,7 @@ namespace WebDAV
       const std::string& remote_file,
       char* buffer_ptr,
       unsigned long long buffer_size,
+      progress_data_t progress_data = nullptr,
       progress_t progress = nullptr
     ) const -> bool;
 
@@ -242,6 +250,7 @@ namespace WebDAV
     auto upload_from(
       const std::string& remote_file,
       std::istream& stream,
+      progress_data_t progress_data = nullptr,
       progress_t progress = nullptr
     ) const -> bool;
 
@@ -257,6 +266,7 @@ namespace WebDAV
       const std::string& remote_file,
       const std::string& local_file,
       callback_t callback = nullptr,
+      progress_data_t progress_data = nullptr,
       progress_t progress = nullptr
     ) const -> void;
 
@@ -266,6 +276,7 @@ namespace WebDAV
       const std::string& remote_file,
       const std::string& local_file,
       callback_t callback = nullptr,
+      progress_data_t progress_data = nullptr,
       progress_t progress = nullptr
     ) const -> bool;
 
@@ -274,6 +285,7 @@ namespace WebDAV
       char*& buffer_ptr,
       unsigned long long& buffer_size,
       callback_t callback = nullptr,
+      progress_data_t progress_data = nullptr,
       progress_t progress = nullptr
     ) const -> bool;
 
@@ -281,6 +293,7 @@ namespace WebDAV
       const std::string& remote_file,
       std::ostream& stream,
       callback_t callback = nullptr,
+      progress_data_t progress_data = nullptr,
       progress_t progress = nullptr
     ) const ;
 
@@ -288,6 +301,7 @@ namespace WebDAV
       const std::string& remote_file,
       const std::string& local_file,
       callback_t callback = nullptr,
+      progress_data_t progress_data = nullptr,
       progress_t progress = nullptr
     ) const ;
 
@@ -296,6 +310,7 @@ namespace WebDAV
       char* buffer_ptr,
       unsigned long long buffer_size,
       callback_t callback = nullptr,
+      progress_data_t progress_data = nullptr,
       progress_t progress = nullptr
     ) const -> bool;
 
@@ -303,6 +318,7 @@ namespace WebDAV
       const std::string& remote_file,
       std::istream& stream,
       callback_t callback = nullptr,
+      progress_data_t progress_data = nullptr,
       progress_t progress = nullptr
     ) const -> bool;
 

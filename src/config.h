@@ -39,7 +39,7 @@
 
 #define CONFIG_LANGUAGE "language"
 
-struct FtpSettings {
+struct WebdavSettings {
     char site_name[32];
     char server[256];
     char username[33];
@@ -48,14 +48,14 @@ struct FtpSettings {
 
 extern bool swap_xo;
 extern std::vector<std::string> sites;
-extern std::map<std::string,FtpSettings> site_settings;
+extern std::map<std::string,WebdavSettings> site_settings;
 extern char local_directory[MAX_PATH_LENGTH];
 extern char remote_directory[MAX_PATH_LENGTH];
 extern char app_ver[6];
 extern char last_site[32];
 extern char display_site[32];
 extern char language[32];
-extern FtpSettings *webdav_settings;
+extern WebdavSettings *webdav_settings;
 extern bool warn_missing_installs;
 
 namespace CONFIG {

@@ -14,7 +14,7 @@ extern "C" {
 bool swap_xo;
 std::vector<std::string> bg_music_list;
 bool enable_backgrou_music;
-FtpSettings *webdav_settings;
+WebdavSettings *webdav_settings;
 char local_directory[MAX_PATH_LENGTH];
 char remote_directory[MAX_PATH_LENGTH];
 char app_ver[6];
@@ -22,7 +22,7 @@ char last_site[32];
 char display_site[32];
 char language[32];
 std::vector<std::string> sites;
-std::map<std::string,FtpSettings> site_settings;
+std::map<std::string,WebdavSettings> site_settings;
 bool warn_missing_installs;
 
 namespace CONFIG {
@@ -58,7 +58,7 @@ namespace CONFIG {
 
         for (int i=0; i <sites.size(); i++)
         {
-            FtpSettings setting;
+            WebdavSettings setting;
             sprintf(setting.site_name, "%s", sites[i].c_str());
 
             sprintf(setting.server, "%s", ReadString(sites[i].c_str(), CONFIG_WEBDAV_SERVER, ""));

@@ -8,31 +8,33 @@
 #include "fs.h"
 
 #define SMB_CLIENT_MAX_FILENAME_LEN 256
-
-class WebDavClient
+namespace WebDAV
 {
-public:
-	int Connect(const char *host, const char *user, const char *pass);
-	int Mkdir(const char *path);
-	int Rmdir(const char *path, bool recursive);
-	int Size(const char *path, int64_t *size);
-	int Get(const char *outputfile, const char *path);
-	int Put(const char *inputfile, const char *path);
-	int Rename(const char *src, const char *dst);
-	int Delete(const char *path);
-	bool FileExists(const char *path);
-	std::vector<FsEntry> ListDir(const char *path);
-	bool IsConnected();
-	bool Ping();
-	const char *LastResponse();
-	int Quit();
-	std::string GetPath(std::string ppath1, std::string ppath2);
+	class WebDavClient
+	{
+	public:
+		int Connect(const char *host, const char *user, const char *pass);
+		int Mkdir(const char *path);
+		int Rmdir(const char *path, bool recursive);
+		int Size(const char *path, uint64_t *size);
+		int Get(const char *outputfile, const char *path);
+		int Put(const char *inputfile, const char *path);
+		int Rename(const char *src, const char *dst);
+		int Delete(const char *path);
+		bool FileExists(const char *path);
+		std::vector<FsEntry> ListDir(const char *path);
+		bool IsConnected();
+		bool Ping();
+		const char *LastResponse();
+		int Quit();
+		std::string GetPath(std::string ppath1, std::string ppath2);
 
-private:
-	int _Rmdir(const char *path);
-	WebDAV::Client *client;
-	char response[1024];
-	bool connected = false;
-};
+	private:
+		int _Rmdir(const char *path);
+		WebDAV::Client *client;
+		char response[1024];
+		bool connected = false;
+	};
 
+}
 #endif
