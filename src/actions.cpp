@@ -6,18 +6,19 @@
 #include "util.h"
 #include "lang.h"
 
-namespace Actions {
-    
+namespace Actions
+{
+
     void RefreshLocalFiles(bool apply_filter)
     {
         multi_selected_local_files.clear();
         local_files.clear();
         int err;
-        if (strlen(local_filter)>0 && apply_filter)
+        if (strlen(local_filter) > 0 && apply_filter)
         {
             std::vector<FsEntry> temp_files = FS::ListDir(local_directory, &err);
             std::string lower_filter = Util::ToLower(local_filter);
-            for (std::vector<FsEntry>::iterator it=temp_files.begin(); it!=temp_files.end(); )
+            for (std::vector<FsEntry>::iterator it = temp_files.begin(); it != temp_files.end();)
             {
                 std::string lower_name = Util::ToLower(it->name);
                 if (lower_name.find(lower_filter) != std::string::npos || strcmp(it->name, "..") == 0)
@@ -48,11 +49,11 @@ namespace Actions {
 
         multi_selected_remote_files.clear();
         remote_files.clear();
-        if (strlen(remote_filter)>0 && apply_filter)
+        if (strlen(remote_filter) > 0 && apply_filter)
         {
             std::vector<FsEntry> temp_files = webdavclient->ListDir(remote_directory);
             std::string lower_filter = Util::ToLower(remote_filter);
-            for (std::vector<FsEntry>::iterator it=temp_files.begin(); it!=temp_files.end(); )
+            for (std::vector<FsEntry>::iterator it = temp_files.begin(); it != temp_files.end();)
             {
                 std::string lower_name = Util::ToLower(it->name);
                 if (lower_name.find(lower_filter) != std::string::npos || strcmp(it->name, "..") == 0)
@@ -80,7 +81,7 @@ namespace Actions {
         {
             std::string temp_path = std::string(entry.directory);
             sprintf(local_directory, "%s", temp_path.substr(0, temp_path.find_last_of("/")).c_str());
-            sprintf(local_file_to_select, "%s", temp_path.substr(temp_path.find_last_of("/")+1).c_str());
+            sprintf(local_file_to_select, "%s", temp_path.substr(temp_path.find_last_of("/") + 1).c_str());
         }
         else
         {
@@ -98,7 +99,7 @@ namespace Actions {
     {
         if (!entry.isDir)
             return;
-        
+
         if (!webdavclient->Ping())
         {
             webdavclient->Quit();
@@ -109,7 +110,7 @@ namespace Actions {
         if (strcmp(entry.name, "..") == 0)
         {
             std::string temp_path = std::string(entry.directory);
-            if (temp_path.size()>1)
+            if (temp_path.size() > 1)
             {
                 if (temp_path.find_last_of("/") == 0)
                 {
@@ -120,7 +121,7 @@ namespace Actions {
                     sprintf(remote_directory, "%s", temp_path.substr(0, temp_path.find_last_of("/")).c_str());
                 }
             }
-            sprintf(remote_file_to_select, "%s", temp_path.substr(temp_path.find_last_of("/")+1).c_str());
+            sprintf(remote_file_to_select, "%s", temp_path.substr(temp_path.find_last_of("/") + 1).c_str());
         }
         else
         {
@@ -212,9 +213,10 @@ namespace Actions {
 
     void DeleteSelectedLocalFiles()
     {
+        sprintf(activity_message, "%s", "");
         bk_activity_thid = sceKernelCreateThread("delete_local_files_thread", (SceKernelThreadEntry)DeleteSelectedLocalFilesThread, 0x10000100, 0x4000, 0, 0, NULL);
-		if (bk_activity_thid >= 0)
-			sceKernelStartThread(bk_activity_thid, 0, NULL);
+        if (bk_activity_thid >= 0)
+            sceKernelStartThread(bk_activity_thid, 0, NULL);
     }
 
     int DeleteSelectedRemotesFilesThread(SceSize args, void *argp)
@@ -226,7 +228,10 @@ namespace Actions {
                 if (it->isDir)
                     webdavclient->Rmdir(it->path, true);
                 else
+                {
+                    sprintf(activity_message, "%s %s\n", lang_strings[STR_DELETING], it->path);
                     webdavclient->Delete(it->path);
+                }
             }
             selected_action = ACTION_REFRESH_REMOTE_FILES;
         }
@@ -243,12 +248,13 @@ namespace Actions {
 
     void DeleteSelectedRemotesFiles()
     {
+        sprintf(activity_message, "%s", "");
         bk_activity_thid = sceKernelCreateThread("delete_remote_files_thread", (SceKernelThreadEntry)DeleteSelectedRemotesFilesThread, 0x10000100, 0x4000, 0, 0, NULL);
-		if (bk_activity_thid >= 0)
-			sceKernelStartThread(bk_activity_thid, 0, NULL);
+        if (bk_activity_thid >= 0)
+            sceKernelStartThread(bk_activity_thid, 0, NULL);
     }
 
-    int UploadFile(const char *src, const char* dest)
+    int UploadFile(const char *src, const char *dest)
     {
         int ret;
         int64_t filesize;
@@ -259,7 +265,7 @@ namespace Actions {
             sprintf(status_message, lang_strings[STR_CONNECTION_CLOSE_ERR_MSG]);
             return ret;
         }
-            
+
         if (overwrite_type == OVERWRITE_PROMPT && webdavclient->FileExists(dest))
         {
             sprintf(confirm_message, "%s %s?", lang_strings[STR_OVERWRITE], dest);
@@ -284,6 +290,7 @@ namespace Actions {
 
         if (confirm_state == CONFIRM_YES)
         {
+            sprintf(activity_message, "%s %s\n", lang_strings[STR_UPLOADING], src);
             return webdavclient->Put(src, dest);
         }
 
@@ -301,10 +308,10 @@ namespace Actions {
             int err;
             std::vector<FsEntry> entries = FS::ListDir(src.path, &err);
             webdavclient->Mkdir(dest);
-            for (int i=0; i<entries.size(); i++)
+            for (int i = 0; i < entries.size(); i++)
             {
                 if (stop_activity)
-		            return 1;
+                    return 1;
 
                 int path_length = strlen(dest) + strlen(entries[i].name) + 2;
                 char *new_path = malloc(path_length);
@@ -365,7 +372,7 @@ namespace Actions {
             if (it->isDir)
             {
                 char new_dir[512];
-                sprintf(new_dir, "%s%s%s", remote_directory, FS::hasEndSlash(remote_directory)? "" : "/", it->name);
+                sprintf(new_dir, "%s%s%s", remote_directory, FS::hasEndSlash(remote_directory) ? "" : "/", it->name);
                 Upload(*it, new_dir);
             }
             else
@@ -380,15 +387,16 @@ namespace Actions {
         selected_action = ACTION_REFRESH_REMOTE_FILES;
         return sceKernelExitDeleteThread(0);
     }
-    
+
     void UploadFiles()
     {
+        sprintf(activity_message, "%s", "");
         bk_activity_thid = sceKernelCreateThread("upload_files_thread", (SceKernelThreadEntry)UploadFilesThread, 0x10000100, 0x4000, 0, 0, NULL);
-		if (bk_activity_thid >= 0)
-			sceKernelStartThread(bk_activity_thid, 0, NULL);
+        if (bk_activity_thid >= 0)
+            sceKernelStartThread(bk_activity_thid, 0, NULL);
     }
 
-    int DownloadFile(const char *src, const char* dest)
+    int DownloadFile(const char *src, const char *dest)
     {
         int ret;
         ret = webdavclient->Size(src, &bytes_to_download);
@@ -423,6 +431,7 @@ namespace Actions {
 
         if (confirm_state == CONFIRM_YES)
         {
+            sprintf(activity_message, "%s %s\n", lang_strings[STR_DOWNLOADING], src);
             return webdavclient->Get(dest, src);
         }
 
@@ -440,10 +449,10 @@ namespace Actions {
             int err;
             std::vector<FsEntry> entries = webdavclient->ListDir(src.path);
             FS::MkDirs(dest);
-            for (int i=0; i<entries.size(); i++)
+            for (int i = 0; i < entries.size(); i++)
             {
                 if (stop_activity)
-		            return 1;
+                    return 1;
 
                 int path_length = strlen(dest) + strlen(entries[i].name) + 2;
                 char *new_path = malloc(path_length);
@@ -502,7 +511,7 @@ namespace Actions {
             if (it->isDir)
             {
                 char new_dir[512];
-                sprintf(new_dir, "%s%s%s", local_directory, FS::hasEndSlash(local_directory)? "" : "/", it->name);
+                sprintf(new_dir, "%s%s%s", local_directory, FS::hasEndSlash(local_directory) ? "" : "/", it->name);
                 Download(*it, new_dir);
             }
             else
@@ -517,12 +526,13 @@ namespace Actions {
         selected_action = ACTION_REFRESH_LOCAL_FILES;
         return sceKernelExitDeleteThread(0);
     }
-    
+
     void DownloadFiles()
     {
+        sprintf(activity_message, "%s", "");
         bk_activity_thid = sceKernelCreateThread("download_files_thread", (SceKernelThreadEntry)DownloadFilesThread, 0x10000100, 0x4000, 0, 0, NULL);
-		if (bk_activity_thid >= 0)
-			sceKernelStartThread(bk_activity_thid, 0, NULL);
+        if (bk_activity_thid >= 0)
+            sceKernelStartThread(bk_activity_thid, 0, NULL);
     }
 
     void ConnectWDV()
@@ -558,7 +568,7 @@ namespace Actions {
 
     void SelectAllLocalFiles()
     {
-        for (int i=0; i<local_files.size(); i++)
+        for (int i = 0; i < local_files.size(); i++)
         {
             if (strcmp(local_files[i].name, "..") != 0)
                 multi_selected_local_files.insert(local_files[i]);
@@ -567,7 +577,7 @@ namespace Actions {
 
     void SelectAllRemoteFiles()
     {
-         for (int i=0; i<remote_files.size(); i++)
+        for (int i = 0; i < remote_files.size(); i++)
         {
             if (strcmp(remote_files[i].name, "..") != 0)
                 multi_selected_remote_files.insert(remote_files[i]);

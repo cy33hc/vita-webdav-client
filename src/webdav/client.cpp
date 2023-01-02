@@ -28,6 +28,7 @@
 #include "pugiext.hpp"
 #include "request.hpp"
 #include "urn.hpp"
+#include "util.h"
 #include <algorithm>
 #include <thread>
 
@@ -480,10 +481,11 @@ namespace WebDAV
         auto modified_date = prop.select_node("*[local-name()='getlastmodified']").node();
         auto resource_type = prop.select_node("*[local-name()='resourcetype']").node();
 
+        std::string name = target_urn.name();
         dict_t information =
             {
                 {"created", creation_date.first_child().value()},
-                {"name", target_urn.name()},
+                {"name", Util::Rtrim(name, "/")},
                 {"size", content_length.first_child().value()},
                 {"modified", modified_date.first_child().value()},
                 {"type", resource_type.first_child().name()}};
@@ -564,9 +566,10 @@ namespace WebDAV
       auto modified_date = prop.select_node("*[local-name()='getlastmodified']").node();
       auto resource_type = prop.select_node("*[local-name()='resourcetype']").node();
 
+      std::string name = resource_urn.name();
       dict_t item = {
           {"created", creation_date.first_child().value()},
-          {"name", resource_urn.name()},
+          {"name", Util::Rtrim(name, "/")},
           {"size", content_length.first_child().value()},
           {"modified", modified_date.first_child().value()},
           {"type", resource_type.first_child().name()}};
