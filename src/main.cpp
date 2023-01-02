@@ -74,6 +74,14 @@ namespace Services
 					NULL,
 					io.Fonts->GetGlyphRangesJapanese());
 			}
+			else if (strcmp(lang.c_str(), "Thai") == 0)
+			{
+				io.Fonts->AddFontFromFileTTF(
+					"ux0:app/SMBCLI001/lang/Thai.ttf",
+					20.0f,
+					NULL,
+					io.Fonts->GetGlyphRangesThai());
+			}
 			else
 			{
 				io.Fonts->AddFontFromFileTTF(
