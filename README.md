@@ -1,11 +1,11 @@
 # vita-webdav-client
-Simple WebDAV Client App for Vita for connecting to remote local WebDAV server or Cloud Storage that supports WebDAV
+Simple WebDAV Client App for Vita for connecting to local WebDAV server or Cloud Storage that supports WebDAV
 
-Tested with following
-[SFTPgo](https://github.com/drakkan/sftpgo) - For local hosted WebDAV server. Can also be used as a proxy for Cloud Storage like AWS S3, Azure Blob or Google Storage.
-Box.com
-Mega.nz
-4shared.com
+Tested with following:
+- **(Recommeded)** [SFTPgo](https://github.com/drakkan/sftpgo) - For local hosted WebDAV server. Can also be used as a webdav frontend for Cloud Storage like AWS S3, Azure Blob or Google Storage.
+- box.com
+- mega.nz
+- 4shared.com
 
 
 ![Preview](/screenshot.jpg)
