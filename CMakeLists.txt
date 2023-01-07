@@ -13,7 +13,7 @@ include("${VITASDK}/share/vita.cmake" REQUIRED)
 
 set(VITA_APP_NAME "WebDav Client")
 set(VITA_TITLEID  "WDVCLI001")
-set(VITA_VERSION  "01.00")
+set(VITA_VERSION  "01.01")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
