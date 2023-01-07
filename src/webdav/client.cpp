@@ -403,7 +403,7 @@ namespace WebDAV
     Header header =
         {
             "Accept: */*",
-            "Depth: 1"};
+            "Depth: 0"};
 
     Data data = {nullptr, 0, 0};
 
