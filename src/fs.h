@@ -28,7 +28,6 @@ struct FsEntry {
     char directory[256];
     char name[256];
     char display_size[32];
-    char display_date[32];
     char path[512];
     int64_t file_size;
     bool isDir;

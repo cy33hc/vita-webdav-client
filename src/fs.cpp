@@ -15,13 +15,14 @@
 #define ERRNO_EEXIST (int)(0x80010000 + SCE_NET_EEXIST)
 #define ERRNO_ENOENT (int)(0x80010000 + SCE_NET_ENOENT)
 
-namespace FS {
+namespace FS
+{
     int hasEndSlash(const char *path)
     {
         return path[strlen(path) - 1] == '/';
     }
 
-    void MkDirs(const std::string& ppath, bool prev = false)
+    void MkDirs(const std::string &ppath, bool prev = false)
     {
         std::string path = ppath;
         if (!prev)
@@ -43,17 +44,17 @@ namespace FS {
         }
     }
 
-    void Rm(const std::string& file)
+    void Rm(const std::string &file)
     {
         int err = sceIoRemove(file.c_str());
     }
 
-    void RmDir(const std::string& path)
+    void RmDir(const std::string &path)
     {
         sceIoRmdir(path.c_str());
     }
 
-    int64_t GetSize(const std::string& path)
+    int64_t GetSize(const std::string &path)
     {
         SceIoStat stat;
         int err = sceIoGetstat(path.c_str(), &stat);
@@ -64,77 +65,77 @@ namespace FS {
         return stat.st_size;
     }
 
-    bool FileExists(const std::string& path)
+    bool FileExists(const std::string &path)
     {
         SceIoStat stat;
         return sceIoGetstat(path.c_str(), &stat) >= 0;
     }
 
-    bool FolderExists(const std::string& path)
+    bool FolderExists(const std::string &path)
     {
         SceIoStat stat;
         sceIoGetstat(path.c_str(), &stat);
         return stat.st_mode & SCE_S_IFDIR;
     }
 
-    void Rename(const std::string& from, const std::string& to)
+    void Rename(const std::string &from, const std::string &to)
     {
         // try to remove first because sceIoRename does not overwrite
         int res = sceIoRename(from.c_str(), to.c_str());
     }
 
-    void* Create(const std::string& path)
+    void *Create(const std::string &path)
     {
         SceUID fd = sceIoOpen(
-                path.c_str(), SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
+            path.c_str(), SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
 
-        return (void*)(intptr_t)fd;
+        return (void *)(intptr_t)fd;
     }
 
-    void* OpenRW(const std::string& path)
+    void *OpenRW(const std::string &path)
     {
         SceUID fd = sceIoOpen(path.c_str(), SCE_O_RDWR, 0777);
-        return (void*)(intptr_t)fd;
+        return (void *)(intptr_t)fd;
     }
 
-    void* OpenRead(const std::string& path)
+    void *OpenRead(const std::string &path)
     {
         SceUID fd = sceIoOpen(path.c_str(), SCE_O_RDONLY, 0777);
-        return (void*)(intptr_t)fd;
+        return (void *)(intptr_t)fd;
     }
 
-    void* Append(const std::string& path)
+    void *Append(const std::string &path)
     {
         SceUID fd =
-                sceIoOpen(path.c_str(), SCE_O_WRONLY | SCE_O_CREAT | SCE_O_APPEND, 0777);
-        return (void*)(intptr_t)fd;
+            sceIoOpen(path.c_str(), SCE_O_WRONLY | SCE_O_CREAT | SCE_O_APPEND, 0777);
+        return (void *)(intptr_t)fd;
     }
 
-    int64_t Seek(void* f, uint64_t offset)
+    int64_t Seek(void *f, uint64_t offset)
     {
         auto const pos = sceIoLseek((intptr_t)f, offset, SCE_SEEK_SET);
         return pos;
     }
 
-    int Read(void* f, void* buffer, uint32_t size)
+    int Read(void *f, void *buffer, uint32_t size)
     {
         const auto read = sceIoRead((SceUID)(intptr_t)f, buffer, size);
         return read;
     }
 
-    int Write(void* f, const void* buffer, uint32_t size)
+    int Write(void *f, const void *buffer, uint32_t size)
     {
         int write = sceIoWrite((SceUID)(intptr_t)f, buffer, size);
         return write;
     }
 
-    void Close(void* f)
+    void Close(void *f)
     {
         SceUID fd = (SceUID)(intptr_t)f;
         int err = sceIoClose(fd);
     }
 
-    std::vector<char> Load(const std::string& path)
+    std::vector<char> Load(const std::string &path)
     {
         SceUID fd = sceIoOpen(path.c_str(), SCE_O_RDONLY, 0777);
         if (fd < 0)
@@ -155,14 +156,14 @@ namespace FS {
         return data;
     }
 
-    void Save(const std::string& path, const void* data, uint32_t size)
+    void Save(const std::string &path, const void *data, uint32_t size)
     {
         SceUID fd = sceIoOpen(
-                path.c_str(), SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
+            path.c_str(), SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
         if (fd < 0)
             return;
 
-        const char* data8 = static_cast<const char*>(data);
+        const char *data8 = static_cast<const char *>(data);
         while (size != 0)
         {
             int written = sceIoWrite(fd, data8, size);
@@ -174,14 +175,14 @@ namespace FS {
         }
     }
 
-    std::vector<FsEntry> ListDir(const std::string& ppath, int *err)
+    std::vector<FsEntry> ListDir(const std::string &ppath, int *err)
     {
         std::vector<FsEntry> out;
         FsEntry entry;
         std::string path = ppath;
-        if (path.find_last_of("/") == path.size()-1)
+        if (path.find_last_of("/") == path.size() - 1)
         {
-            path = path.substr(0, path.size()-1);
+            path = path.substr(0, path.size() - 1);
         }
         memset(&entry, 0, sizeof(FsEntry));
         sprintf(entry.directory, "%s", path.c_str());
@@ -205,7 +206,8 @@ namespace FS {
             SceIoDirent dirent;
             FsEntry entry;
             const auto ret = sceIoDread(fd, &dirent);
-            if (ret < 0) {
+            if (ret < 0)
+            {
                 *err = ret;
                 sceIoDclose(fd);
                 return out;
@@ -216,17 +218,24 @@ namespace FS {
             {
                 snprintf(entry.directory, 512, "%s", path.c_str());
                 snprintf(entry.name, 256, "%s", dirent.d_name);
-                entry.modified.day = dirent.d_stat.st_mtime.day;
-                entry.modified.month = dirent.d_stat.st_mtime.month;
-                entry.modified.year = dirent.d_stat.st_mtime.year;
-                entry.modified.hours = dirent.d_stat.st_mtime.hour;
-                entry.modified.minutes = dirent.d_stat.st_mtime.minute;
-                entry.modified.seconds = dirent.d_stat.st_mtime.second;
-                entry.modified.microsecond = dirent.d_stat.st_mtime.microsecond;
-                SceDateTime local_time;
-                Util::convertUtcToLocalTime(&local_time, &entry.modified);
-                sprintf(entry.display_date, "%02d/%02d/%d %02d:%02d:%02d", local_time.day, local_time.month, local_time.year,
-                         local_time.hour, local_time.minute, local_time.second);
+
+                SceDateTime gmt;
+                SceDateTime lt;
+                gmt.day = dirent.d_stat.st_mtime.day;
+                gmt.month = dirent.d_stat.st_mtime.month;
+                gmt.year = dirent.d_stat.st_mtime.year;
+                gmt.hour = dirent.d_stat.st_mtime.hour;
+                gmt.minute = dirent.d_stat.st_mtime.minute;
+                gmt.second = dirent.d_stat.st_mtime.second;
+                gmt.microsecond = dirent.d_stat.st_mtime.microsecond;
+                Util::convertUtcToLocalTime(&gmt, &lt);
+                entry.modified.day = lt.day;
+                entry.modified.month = lt.month;
+                entry.modified.year = lt.year;
+                entry.modified.hours = lt.hour;
+                entry.modified.minutes = lt.minute;
+                entry.modified.seconds = lt.second;
+                entry.modified.microsecond = lt.microsecond;
 
                 if (hasEndSlash(path.c_str()))
                 {
@@ -234,7 +243,7 @@ namespace FS {
                 }
                 else
                 {
-                    sprintf(entry.path, "%s/%s", path.c_str(), entry.name);   
+                    sprintf(entry.path, "%s/%s", path.c_str(), entry.name);
                 }
 
                 if (SCE_S_ISDIR(dirent.d_stat.st_mode))
@@ -250,17 +259,17 @@ namespace FS {
                     {
                         sprintf(entry.display_size, "%lldB", entry.file_size);
                     }
-                    else if (entry.file_size < 1024*1024)
+                    else if (entry.file_size < 1024 * 1024)
                     {
-                        sprintf(entry.display_size, "%.2fKB", entry.file_size*1.0f/1024);
+                        sprintf(entry.display_size, "%.2fKB", entry.file_size * 1.0f / 1024);
                     }
-                    else if (entry.file_size < 1024*1024*1024)
+                    else if (entry.file_size < 1024 * 1024 * 1024)
                     {
-                        sprintf(entry.display_size, "%.2fMB", entry.file_size*1.0f/(1024*1024));
+                        sprintf(entry.display_size, "%.2fMB", entry.file_size * 1.0f / (1024 * 1024));
                     }
                     else
                     {
-                        sprintf(entry.display_size, "%.2fGB", entry.file_size*1.0f/(1024*1024*1024));
+                        sprintf(entry.display_size, "%.2fGB", entry.file_size * 1.0f / (1024 * 1024 * 1024));
                     }
                     entry.isDir = false;
                 }
@@ -272,7 +281,7 @@ namespace FS {
         return out;
     }
 
-    std::vector<std::string> ListFiles(const std::string& path)
+    std::vector<std::string> ListFiles(const std::string &path)
     {
         const auto fd = sceIoDopen(path.c_str());
         if (static_cast<uint32_t>(fd) == 0x80010002)
@@ -285,7 +294,8 @@ namespace FS {
         {
             SceIoDirent dirent;
             const auto ret = sceIoDread(fd, &dirent);
-            if (ret < 0) {
+            if (ret < 0)
+            {
                 sceIoDclose(fd);
                 return out;
             }
@@ -295,7 +305,7 @@ namespace FS {
             if (SCE_S_ISDIR(dirent.d_stat.st_mode))
             {
                 std::vector<std::string> files = FS::ListFiles(path + "/" + dirent.d_name);
-                for (std::vector<std::string>::iterator it=files.begin(); it!=files.end(); )
+                for (std::vector<std::string>::iterator it = files.begin(); it != files.end();)
                 {
                     out.push_back(std::string(dirent.d_name) + "/" + *it);
                     ++it;
@@ -310,7 +320,7 @@ namespace FS {
         return out;
     }
 
-    int RmRecursive(const std::string& path)
+    int RmRecursive(const std::string &path)
     {
         if (stop_activity)
             return 1;
@@ -319,7 +329,7 @@ namespace FS {
         {
             int res = 0;
 
-            do 
+            do
             {
                 SceIoDirent dir;
                 memset(&dir, 0, sizeof(SceIoDirent));
@@ -333,15 +343,16 @@ namespace FS {
                     if (SCE_S_ISDIR(dir.d_stat.st_mode))
                     {
                         int ret = RmRecursive(new_path);
-                        if (ret <= 0) {
+                        if (ret <= 0)
+                        {
                             sprintf(status_message, "%s %s", lang_strings[STR_FAIL_DEL_DIR_MSG], new_path);
                             free(new_path);
                             sceIoDclose(dfd);
                             return ret;
                         }
-                        
                     }
-                    else {
+                    else
+                    {
                         snprintf(activity_message, 1024, "%s %s", lang_strings[STR_DELETING], new_path);
                         int ret = sceIoRemove(new_path);
                         if (ret < 0)
@@ -368,7 +379,8 @@ namespace FS {
                 return ret;
             }
             snprintf(activity_message, 1024, "%s %s", lang_strings[STR_DELETED], path.c_str());
-        } else
+        }
+        else
         {
             int ret = sceIoRemove(path.c_str());
             if (ret < 0)
@@ -386,9 +398,9 @@ namespace FS {
     {
         const FsEntry *p1 = (FsEntry *)v1;
         const FsEntry *p2 = (FsEntry *)v2;
-    	if (strcasecmp(p1->name, "..") == 0)
-	    	return -1;
-		if (strcasecmp(p2->name, "..") == 0)
+        if (strcasecmp(p1->name, "..") == 0)
+            return -1;
+        if (strcasecmp(p2->name, "..") == 0)
             return 1;
 
         if (p1->isDir && !p2->isDir)
@@ -407,8 +419,8 @@ namespace FS {
     {
         qsort(&list[0], list.size(), sizeof(FsEntry), FsEntryComparator);
     }
-    
-    std::string GetPath(const std::string& ppath1, const std::string& ppath2)
+
+    std::string GetPath(const std::string &ppath1, const std::string &ppath2)
     {
         std::string path1 = ppath1;
         std::string path2 = ppath2;

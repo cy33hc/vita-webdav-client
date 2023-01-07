@@ -904,7 +904,8 @@ namespace Windows
             ImGui::TextColored(colors[ImGuiCol_ButtonHovered], "%s:", lang_strings[STR_DATE]);
             ImGui::SameLine();
             ImGui::SetCursorPosX(105);
-            ImGui::Text(item.display_date);
+            ImGui::Text("%02d/%02d/%d %02d:%02d:%02d", item.modified.day, item.modified.month, item.modified.year,
+                         item.modified.hours, item.modified.minutes, item.modified.seconds);
             ImGui::Separator();
 
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 200);

@@ -1,3 +1,4 @@
+#include <vitasdk.h>
 #include <errno.h>
 #include <unistd.h>
 #include <cstring>
@@ -53,7 +54,7 @@ namespace WebDAV
 		std::string root_folder = "/";
 		if (scheme_pos != std::string::npos)
 		{
-			std::size_t root_folder_pos = url.find_first_of("/", scheme_pos+3);
+			std::size_t root_folder_pos = url.find_first_of("/", scheme_pos + 3);
 			if (root_folder_pos != std::string::npos)
 			{
 				root_folder = url.substr(root_folder_pos);
@@ -252,7 +253,6 @@ namespace WebDAV
 			memset(&entry, 0, sizeof(entry));
 			sprintf(entry.directory, "%s", path);
 			sprintf(entry.name, WebDAV::get(files[i], "name").c_str());
-			sprintf(entry.display_date, WebDAV::get(files[i], "modified").c_str());
 
 			if (strlen(path) == 1 and path[0] == '/')
 			{
@@ -264,7 +264,7 @@ namespace WebDAV
 			}
 
 			std::string resource_type = WebDAV::get(files[i], "type");
-			entry.isDir = resource_type == "d:collection" || resource_type == "D:collection";
+			entry.isDir = resource_type.find("collection") != std::string::npos;
 			entry.file_size = 0;
 			if (!entry.isDir)
 			{
@@ -289,6 +289,34 @@ namespace WebDAV
 			else
 			{
 				sprintf(entry.display_size, "%s", lang_strings[STR_FOLDER]);
+			}
+
+			char modified_date[32];
+			char *p_char = NULL;
+			sprintf(modified_date, "%s", WebDAV::get(files[i], "modified").c_str());
+			p_char = strchr(modified_date, ' ');
+			if (p_char)
+			{
+				SceDateTime gmt;
+				SceDateTime lt;
+				char month[5];
+				sscanf(p_char, "%hd %s %hd %hd:%hd:%hd", &gmt.day, month, &gmt.year, &gmt.hour, &gmt.minute, &gmt.second);
+				for (int k = 0; k < 12; k++)
+				{
+					if (strcmp(month, months[k]) == 0)
+					{
+						gmt.month = k + 1;
+						break;
+					}
+				}
+				Util::convertUtcToLocalTime(&gmt, &lt);
+				entry.modified.day = lt.day;
+				entry.modified.month = lt.month;
+				entry.modified.year = lt.year;
+				entry.modified.hours = lt.hour;
+				entry.modified.minutes = lt.minute;
+				entry.modified.seconds = lt.second;
+				entry.modified.microsecond = lt.microsecond;
 			}
 
 			out.push_back(entry);
