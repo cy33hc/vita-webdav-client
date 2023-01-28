@@ -13,7 +13,7 @@ include("${VITASDK}/share/vita.cmake" REQUIRED)
 
 set(VITA_APP_NAME "WebDav Client")
 set(VITA_TITLEID  "WDVCLI001")
-set(VITA_VERSION  "01.01")
+set(VITA_VERSION  "01.02")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
@@ -128,6 +128,11 @@ vita_create_vpk(${PROJECT_NAME}.vpk ${VITA_TITLEID} eboot.bin
   FILE lang/Galego.ini lang/Galego.ini
   FILE lang/Croatian.ini lang/Croatian.ini
   FILE lang/Indonesian.ini lang/Indonesian.ini
-  FILE lang/Ryukyuan.ini lang/Ryukyuan.ini
+  FILE lang/Arabic.ini lang/Arabic.ini
+  FILE lang/Greek.ini lang/Greek.ini
+  FILE lang/Hungarian.ini lang/Hungarian.ini
+  FILE lang/Thai.ini lang/Thai.ini
+  FILE lang/Turkish.ini lang/Turkish.ini
+  FILE lang/Roboto_ext.ttf lang/Roboto_ext.ttf
   FILE version.txt version.txt
 )
