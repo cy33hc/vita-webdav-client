@@ -1,3 +1,5 @@
+# This repo is archived, please refer to the superceded version. https://github.com/cy33hc/vita-ezremote-client
+
 # vita-webdav-client
 Simple WebDAV Client App for Vita for connecting to local WebDAV server or Cloud Storage that supports WebDAV
 
